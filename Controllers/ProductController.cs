@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using ProductApi.Services;
-using ProductApi.DTOs;
 
+using Microsoft.AspNetCore.Mvc;
+using ProductApi.DTOs;
+using ProductApi.Services;
 
 namespace ProductApi.Controllers;
 
@@ -17,19 +17,19 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult GetProducts()
+    public async Task<IActionResult> GetProducts()
     {
-        var products = _productService.GetProducts();
+        var products = await _productService.GetProductsAsync();
 
         return Ok(products);
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetProduct(int id)
+    public async Task<IActionResult> GetProduct(int id)
     {
-        var product = _productService.GetProductById(id);
+        var product = await _productService.GetProductByIdAsync(id);
 
-        if (product == null)
+        if (product is null)
         {
             return NotFound();
         }
@@ -38,9 +38,10 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult CreateProduct(CreateProductDto dto)
+    public async Task<IActionResult> CreateProduct(
+        CreateProductDto dto)
     {
-        var product = _productService.CreateProduct(
+        var product = await _productService.CreateProductAsync(
             dto.Nome,
             dto.Preco
         );
@@ -53,15 +54,17 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateProduct(int id, UpdateProductDto dto)
+    public async Task<IActionResult> UpdateProduct(
+        int id,
+        UpdateProductDto dto)
     {
-        var product = _productService.UpdateProduct(
+        var product = await _productService.UpdateProductAsync(
             id,
             dto.Nome,
             dto.Preco
         );
 
-        if (product == null)
+        if (product is null)
         {
             return NotFound();
         }
@@ -70,9 +73,9 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteProduct(int id)
+    public async Task<IActionResult> DeleteProduct(int id)
     {
-        var deleted = _productService.DeleteProduct(id);
+        var deleted = await _productService.DeleteProductAsync(id);
 
         if (!deleted)
         {

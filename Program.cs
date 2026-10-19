@@ -1,11 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using ProductApi.Data;
 using ProductApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-// builder.Services.AddScoped<ProductService>();
-builder.Services.AddSingleton<ProductService>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
+ builder.Services.AddScoped<ProductService>();
+//builder.Services.AddSingleton<ProductService>();
 
 builder.Services.AddOpenApi();
 

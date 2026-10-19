@@ -1,55 +1,58 @@
+
+using Microsoft.EntityFrameworkCore;
+using ProductApi.Data;
 using ProductApi.Models;
 
 namespace ProductApi.Services;
 
 public class ProductService
 {
-    private readonly List<Product> _products = new()
-    {
-        new Product
-        {
-            Id = 1,
-            Nome = "Suporte de celular",
-            Preco = 29.90m
-        },
+    private readonly AppDbContext _context;
 
-        new Product
-        {
-            Id = 2,
-            Nome = "Vaso decorativo",
-            Preco = 45.90m
-        }
-    };
-
-    public List<Product> GetProducts()
+    public ProductService(AppDbContext context)
     {
-        return _products;
+        _context = context;
     }
 
-    public Product? GetProductById(int id)
+    public async Task<List<Product>> GetProductsAsync()
     {
-        return _products.FirstOrDefault(product => product.Id == id);
+        return await _context.Products
+            .AsNoTracking()
+            .ToListAsync();
     }
 
-    public Product CreateProduct(string nome, decimal preco)
+    public async Task<Product?> GetProductByIdAsync(int id)
+    {
+        return await _context.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == id);
+    }
+
+    public async Task<Product> CreateProductAsync(
+        string nome,
+        decimal preco)
     {
         var product = new Product
         {
-            Id = _products.Count + 1,
             Nome = nome,
             Preco = preco
         };
 
-        _products.Add(product);
+        _context.Products.Add(product);
+
+        await _context.SaveChangesAsync();
 
         return product;
     }
 
-    public Product? UpdateProduct(int id, string nome, decimal preco)
+    public async Task<Product?> UpdateProductAsync(
+        int id,
+        string nome,
+        decimal preco)
     {
-        var product = _products.FirstOrDefault(product => product.Id == id);
+        var product = await _context.Products.FindAsync(id);
 
-        if (product == null)
+        if (product is null)
         {
             return null;
         }
@@ -57,19 +60,23 @@ public class ProductService
         product.Nome = nome;
         product.Preco = preco;
 
+        await _context.SaveChangesAsync();
+
         return product;
     }
 
-    public bool DeleteProduct(int id)
+    public async Task<bool> DeleteProductAsync(int id)
     {
-        var product = _products.FirstOrDefault(product => product.Id == id);
+        var product = await _context.Products.FindAsync(id);
 
-        if (product == null)
+        if (product is null)
         {
             return false;
         }
 
-        _products.Remove(product);
+        _context.Products.Remove(product);
+
+        await _context.SaveChangesAsync();
 
         return true;
     }
